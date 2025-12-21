@@ -6,8 +6,8 @@
     "web": {
       "output": "static"
     },
-    "name": "grounded",
-    "slug": "grounded",
+    "name": "kelp",
+    "slug": "kelp",
     "ios": {
       "icon": {
         "dark": "./assets/icons/ios-dark.png",

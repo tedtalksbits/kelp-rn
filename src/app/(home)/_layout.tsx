@@ -23,7 +23,7 @@ export default function Layout() {
           style={styles.logo}
           resizeMode='contain'
         />
-        <Text>Grounded</Text>
+        <Text>kelp</Text>
       </View>
     );
   };
@@ -64,7 +64,7 @@ export default function Layout() {
         />
         <Slot />
       </Stack>
-      <PortalHost />
+      {/* <PortalHost /> */}
     </View>
   );
 }

@@ -23,6 +23,7 @@ import TabsDemo from '@/components/demos/tabs-demo';
 import { ScreenScrollView } from '@/components/screen-scroll-view';
 import { Switch } from '@/components/switch';
 import { Text } from '@/components/text';
+import { useAuth } from '@/providers/auth-provider';
 import { StatusBar } from 'expo-status-bar';
 import React from 'react';
 import { Image, ScrollView, View } from 'react-native';
@@ -38,7 +39,6 @@ const AnimatedView = Animated.createAnimatedComponent(View);
 const AnimatedImage = Animated.createAnimatedComponent(Image);
 
 export default function App() {
-  const [checked, setChecked] = React.useState(false);
   return (
     <ScreenScrollView>
       <View className='gap-48 py-4'>

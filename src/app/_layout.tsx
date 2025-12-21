@@ -5,10 +5,10 @@ import {
   Inter_700Bold,
   useFonts,
 } from '@expo-google-fonts/inter';
-import { Slot } from 'expo-router';
+import { Slot, Stack } from 'expo-router';
 import { HeroUINativeProvider } from 'heroui-native';
 import { useCallback } from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import {
   KeyboardAvoidingView,
@@ -21,6 +21,9 @@ import {
 import '../global.css';
 import { AppThemeProvider } from '../contexts/app-theme-context';
 import { Toaster } from 'sonner-native';
+import { QueryProvider } from '@/providers/query-provider';
+import { AuthProvider } from '@/providers/auth-provider';
+import { PortalHost } from '@rn-primitives/portal';
 
 configureReanimatedLogger({
   level: ReanimatedLogLevel.warn,
@@ -47,18 +50,28 @@ function AppContent() {
   );
 
   return (
-    <AppThemeProvider>
-      <HeroUINativeProvider
-        config={{
-          toast: {
-            contentWrapper,
-          },
-        }}
-      >
-        <Slot />
-        <Toaster position='top-center' />
-      </HeroUINativeProvider>
-    </AppThemeProvider>
+    <KeyboardAvoidingView
+      pointerEvents='box-none'
+      behavior='padding'
+      keyboardVerticalOffset={12}
+      className='flex-1'
+    >
+      <View className='flex-1 bg-background'>
+        <QueryProvider>
+          <AuthProvider>
+            <AppThemeProvider>
+              <Stack screenOptions={{ headerShown: false }}>
+                <Stack.Screen name='index' />
+                <Stack.Screen name='(auth)' />
+                <Stack.Screen name='(tabs)' />
+              </Stack>
+              <PortalHost />
+              <Toaster position='top-center' />
+            </AppThemeProvider>
+          </AuthProvider>
+        </QueryProvider>
+      </View>
+    </KeyboardAvoidingView>
   );
 }
 

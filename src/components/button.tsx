@@ -49,7 +49,7 @@ const buttonTextVariants = cva('text-center capitalize', {
       default: 'text-primary-foreground',
       secondary: 'text-secondary-foreground',
       destructive: 'text-destructive-foreground',
-      ghost: 'text-accent-foreground',
+      ghost: 'text-foreground',
       link: 'text-primary-foreground underline',
       outline: 'text-foreground',
     },
@@ -107,11 +107,11 @@ const Button = React.forwardRef<View, ButtonProps>(
 
         {children ? (
           <Text
-          // className={cn(
-          //   'font-semibold',
-          //   buttonTextVariants({ variant }),
-          //   labelProps?.className
-          // )}
+            className={cn(
+              'font-semibold',
+              buttonTextVariants({ variant }),
+              labelProps?.className
+            )}
           >
             {children}
           </Text>
