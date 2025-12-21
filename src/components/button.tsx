@@ -14,6 +14,7 @@ const buttonVariants = cva('flex flex-row items-center justify-center', {
       ghost: 'bg-transparent',
       link: 'text-primary underline-offset-4',
       outline: 'bg-foreground/10',
+      accent: 'bg-accent',
     },
     size: {
       // default: 'h-14 px-6',
@@ -52,6 +53,7 @@ const buttonTextVariants = cva('text-center capitalize', {
       ghost: 'text-foreground',
       link: 'text-primary-foreground underline',
       outline: 'text-foreground',
+      accent: 'text-accent-foreground',
     },
   },
   defaultVariants: {
