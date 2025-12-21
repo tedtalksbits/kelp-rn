@@ -14,7 +14,7 @@ export default function SignUpScreen() {
         h={0.5}
         headerImage={<Image source={Logo} style={{ flex: 1 }} />}
       >
-        <Text className='text-4xl font-black text-white uppercase leading-tight mb-4 text-center'>
+        <Text className='text-4xl font-black uppercase leading-tight mb-4 text-center'>
           Start your fitness journey.
         </Text>
         <Text className='text-center text-base leading-relaxed text-muted-foreground'>
