@@ -7,6 +7,55 @@ export type Json =
   | Json[];
 
 export type Database = {
+  graphql_public: {
+    Tables: {
+      [_ in never]: never;
+    };
+    Views: {
+      [_ in never]: never;
+    };
+    Functions: {
+      graphql: {
+        Args: {
+          operationName?: string;
+          query?: string;
+          variables?: Json;
+          extensions?: Json;
+        };
+        Returns: Json;
+      };
+    };
+    Enums: {
+      [_ in never]: never;
+    };
+    CompositeTypes: {
+      [_ in never]: never;
+    };
+  };
+
+  pgbouncer: {
+    Tables: {
+      [_ in never]: never;
+    };
+    Views: {
+      [_ in never]: never;
+    };
+    Functions: {
+      get_auth: {
+        Args: { p_usename: string };
+        Returns: {
+          username: string;
+          password: string;
+        }[];
+      };
+    };
+    Enums: {
+      [_ in never]: never;
+    };
+    CompositeTypes: {
+      [_ in never]: never;
+    };
+  };
   public: {
     Tables: {
       kelp_exercise_logs: {
@@ -390,7 +439,7 @@ export type Database = {
           created_at?: string;
           description?: string | null;
           estimated_calories?: number | null;
-          estimated_duration_minutes: number | null;
+          estimated_duration_minutes?: number | null;
           focus_area?: Database['public']['Enums']['kelp_body_part'] | null;
           id?: string;
           intensity?:
@@ -517,19 +566,6 @@ export type Database = {
       };
     };
     Views: {
-      user_stats: {
-        Row: {
-          completed_projects: number | null;
-          followers_count: number | null;
-          following_count: number | null;
-          total_hours: number | null;
-          total_likes: number | null;
-          total_projects: number | null;
-          total_spent: number | null;
-          user_id: string | null;
-        };
-        Relationships: [];
-      };
       kelp_all_available_templates: {
         Row: {
           ai_generation_context: string | null;
@@ -598,6 +634,52 @@ export type Database = {
       };
     };
     Functions: {
+      citext: {
+        Args: { '': boolean } | { '': string } | { '': unknown };
+        Returns: string;
+      };
+      citext_hash: {
+        Args: { '': string };
+        Returns: number;
+      };
+      citextin: {
+        Args: { '': unknown };
+        Returns: string;
+      };
+      citextout: {
+        Args: { '': string };
+        Returns: unknown;
+      };
+      citextrecv: {
+        Args: { '': unknown };
+        Returns: string;
+      };
+      citextsend: {
+        Args: { '': string };
+        Returns: string;
+      };
+
+      gtrgm_compress: {
+        Args: { '': unknown };
+        Returns: unknown;
+      };
+      gtrgm_decompress: {
+        Args: { '': unknown };
+        Returns: unknown;
+      };
+      gtrgm_in: {
+        Args: { '': unknown };
+        Returns: unknown;
+      };
+      gtrgm_options: {
+        Args: { '': unknown };
+        Returns: undefined;
+      };
+      gtrgm_out: {
+        Args: { '': unknown };
+        Returns: unknown;
+      };
+
       kelp_clone_system_template_to_user: {
         Args: {
           p_system_template_id: string;
@@ -634,16 +716,13 @@ export type Database = {
         Returns: string;
       };
       kelp_get_exercise_history: {
-        Args:
-          | { p_user_id: string; p_exercise_id: string; p_limit?: number }
-          | { p_user_id: string; p_exercise_name: string; p_limit?: number };
+        Args: { p_user_id: string; p_exercise_id: string; p_limit?: number };
         Returns: {
           workout_date: string;
           sets_completed: number;
           reps_completed: number;
-          weight_used: number;
-          difficulty_rating: number;
-          notes: string;
+          weight_kg: number;
+          duration_seconds: number;
         }[];
       };
       kelp_get_user_stats: {
@@ -677,11 +756,12 @@ export type Database = {
         }[];
       };
       kelp_get_weekly_activity: {
-        Args: { p_user_id: string };
+        Args: { p_user_id: string; p_week_start?: string };
         Returns: {
-          day_of_week: string;
-          workout_count: number;
-          total_minutes: number;
+          day_of_week: number;
+          day_name: string;
+          exercise_count: number;
+          workout_date: string;
         }[];
       };
     };
@@ -1346,34 +1426,7 @@ export type CompositeTypes<
     : never;
 
 export const Constants = {
-  cronos: {
-    Enums: {
-      audit_action: ['create', 'update', 'delete', 'execute'],
-      job_status: ['pending', 'running', 'succeeded', 'failed'],
-      job_type: [
-        'sql_snippet',
-        'database_function',
-        'http_request',
-        'edge_function',
-      ],
-      notification_type: ['email', 'webhook', 'slack'],
-    },
-  },
   graphql_public: {
-    Enums: {},
-  },
-  homefin: {
-    Enums: {
-      account_type: ['cash', 'investment', 'debt'],
-    },
-  },
-  invite: {
-    Enums: {},
-  },
-  keepup: {
-    Enums: {},
-  },
-  motion: {
     Enums: {},
   },
   pgbouncer: {
@@ -1392,19 +1445,14 @@ export const Constants = {
         'full_body',
       ],
       kelp_fitness_level: ['sedentary', 'beginner', 'intermediate', 'advanced'],
+      kelp_workout_intensity: ['low', 'medium', 'high'],
       kelp_workout_status: ['scheduled', 'in_progress', 'completed', 'skipped'],
     },
-  },
-  quack: {
-    Enums: {},
   },
   storage: {
     Enums: {
       buckettype: ['STANDARD', 'ANALYTICS'],
     },
-  },
-  vault_app: {
-    Enums: {},
   },
 } as const;
 
@@ -1492,7 +1540,8 @@ export type UserTemplateWithEquipment =
   Database['public']['Views']['kelp_user_templates_with_equipment']['Row'];
 
 // User Stats View
-export type UserStats = Database['public']['Views']['user_stats']['Row'];
+export type UserStats =
+  Database['public']['Functions']['kelp_get_user_stats']['Returns'][0];
 
 // ============================================================================
 // FUNCTION RETURN TYPE EXPORTS
