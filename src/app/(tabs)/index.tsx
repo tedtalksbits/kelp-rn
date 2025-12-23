@@ -30,14 +30,14 @@ export default function index() {
           >
             {lastSession ? <>Continue Workout</> : 'Workout of the Day'}
           </Text>
-          <Text className='text-4xl font-black text-white uppercase leading-[0.9] mb-4'>
+          <Text className='text-4xl font-black uppercase leading-[0.9] mb-4'>
             {lastSession ? (
               <>{lastSession.title}</>
             ) : (
               <>Ignite Your Potential</>
             )}
           </Text>
-          <Text className='text-neutral-300 mb-6 max-w-[80%] line-clamp-2'>
+          <Text className='text-muted-foreground mb-6 max-w-[80%] line-clamp-2'>
             {lastSession
               ? lastSession.description
               : 'Push past your limits with this high-intensity interval series.'}

@@ -327,117 +327,101 @@ function WorkoutCard({
         isVisible={isVisible}
         onClose={close}
         title={workout.title}
+        titleClassName='uppercase font-black'
         snapPoints={[0.9]}
       >
-        <ScrollView
-          className='flex-1 -mx-4'
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 100 }}
-        >
-          <View className='px-4'>
-            {/* Description */}
-            {workout.description && (
-              <Text className='text-muted-foreground mb-6'>
-                {workout.description}
-              </Text>
-            )}
-
-            {/* Stats */}
-            <View className='flex flex-row gap-2 mb-6 flex-wrap'>
-              {workout.intensity && (
-                <View
-                  className={cn(
-                    'px-3 py-2 rounded-lg',
-                    getIntensityColor(workout.intensity)
-                  )}
-                >
-                  <Text className='text-xs font-bold uppercase'>
-                    {workout.intensity}
-                  </Text>
-                </View>
-              )}
-              {workout.estimated_duration_minutes && (
-                <Surface className='px-3 py-2 rounded-lg flex flex-row items-center gap-2'>
-                  <Clock size={14} color='#71717a' />
-                  <Text className='text-xs font-bold'>
-                    {workout.estimated_duration_minutes} min
-                  </Text>
-                </Surface>
-              )}
-              {workout.focus_area && (
-                <Surface className='px-3 py-2 rounded-lg flex flex-row items-center gap-2'>
-                  <Target size={14} color='#71717a' />
-                  <Text className='text-xs font-bold uppercase'>
-                    {workout.focus_area}
-                  </Text>
-                </Surface>
-              )}
-            </View>
-
-            {/* Exercises */}
-            <Text className='font-bold uppercase text-sm mb-4'>
-              Workout Structure
+        <View className='px-4'>
+          {/* Description */}
+          {workout.description && (
+            <Text className='text-muted-foreground mb-6 text-center'>
+              {workout.description}
             </Text>
+          )}
 
-            {templateDetail?.exercises &&
-            templateDetail.exercises.length > 0 ? (
-              <View className='gap-3 mb-6'>
-                {templateDetail.exercises.map((ex: any, idx: number) => (
-                  <Surface key={ex.id} className='p-4 rounded-lg'>
-                    <View className='flex flex-row items-start justify-between mb-2'>
-                      <View className='flex-1'>
-                        <Text className='font-bold text-base mb-1'>
-                          {ex.exercise?.name || 'Exercise'}
-                        </Text>
-                        {ex.exercise?.primary_muscles && (
-                          <Text className='text-xs text-muted-foreground uppercase'>
-                            {ex.exercise.primary_muscles.join(' • ')}
-                          </Text>
-                        )}
-                      </View>
-                      <View className='bg-primary/20 w-8 h-8 rounded-full items-center justify-center'>
-                        <Text className='text-primary font-bold text-xs'>
-                          {idx + 1}
-                        </Text>
-                      </View>
-                    </View>
-
-                    {/* Sets/Reps Info */}
-                    <View className='flex flex-row gap-4 mt-2'>
-                      {ex.sets && (
-                        <Text className='text-sm text-muted-foreground'>
-                          {ex.sets} sets
-                        </Text>
-                      )}
-                      {ex.reps && (
-                        <Text className='text-sm text-muted-foreground'>
-                          {ex.reps} reps
-                        </Text>
-                      )}
-                      {ex.duration_seconds && (
-                        <Text className='text-sm text-muted-foreground'>
-                          {ex.duration_seconds}s
-                        </Text>
-                      )}
-                    </View>
-
-                    {ex.notes && (
-                      <Text className='text-xs text-muted-foreground mt-2'>
-                        {ex.notes}
-                      </Text>
-                    )}
-                  </Surface>
-                ))}
+          {/* Stats */}
+          <View className='flex flex-row gap-2 mb-6 flex-wrap'>
+            {workout.intensity && (
+              <View
+                className={cn(
+                  'px-3 py-2 rounded-lg',
+                  getIntensityColor(workout.intensity)
+                )}
+              >
+                <Text className='text-xs font-bold uppercase'>
+                  {workout.intensity}
+                </Text>
               </View>
-            ) : (
-              <Surface className='p-6 items-center mb-6'>
-                <Text className='text-muted-foreground text-sm'>
-                  No exercises added yet
+            )}
+            {workout.estimated_duration_minutes && (
+              <Surface className='px-3 py-2 rounded-lg flex flex-row items-center gap-2'>
+                <Clock size={14} color='#71717a' />
+                <Text className='text-xs font-bold'>
+                  {workout.estimated_duration_minutes} min
+                </Text>
+              </Surface>
+            )}
+            {workout.focus_area && (
+              <Surface className='px-3 py-2 rounded-lg flex flex-row items-center gap-2'>
+                <Target size={14} color='#71717a' />
+                <Text className='text-xs font-bold uppercase'>
+                  {workout.focus_area.replace('_', ' ')}
                 </Text>
               </Surface>
             )}
           </View>
-        </ScrollView>
+
+          {/* Exercises */}
+          <Text className='font-bold uppercase text-sm mb-4'>
+            Workout Structure
+          </Text>
+
+          {templateDetail?.exercises && templateDetail.exercises.length > 0 ? (
+            <View className='gap-3 mb-6'>
+              {templateDetail.exercises.map((ex, idx: number) => (
+                <Surface key={ex.id} className='p-4 rounded-lg'>
+                  <View className='flex flex-row items-start justify-between mb-2'>
+                    <View className='flex-1'>
+                      <Text className='font-bold uppercase text-base mb-1'>
+                        {ex.exercise?.name || 'Exercise'}
+                      </Text>
+                      {ex.exercise?.target_muscle && (
+                        <Text className='text-xs text-muted-foreground uppercase'>
+                          {ex.exercise.target_muscle}
+                        </Text>
+                      )}
+                    </View>
+                  </View>
+
+                  {/* Sets/Reps Info */}
+                  <View className='flex flex-row gap-4 mt-2'>
+                    {ex.target_sets && (
+                      <Text className='text-sm text-muted-foreground'>
+                        {ex.target_sets} sets
+                      </Text>
+                    )}
+                    {ex.target_reps && (
+                      <Text className='text-sm text-muted-foreground'>
+                        {ex.target_reps} reps
+                      </Text>
+                    )}
+                  </View>
+
+                  {ex.notes && (
+                    <Text className='text-xs text-muted-foreground mt-2'>
+                      {ex.notes}
+                    </Text>
+                  )}
+                </Surface>
+              ))}
+            </View>
+          ) : (
+            <Surface className='p-6 items-center mb-6'>
+              <Text className='text-muted-foreground text-sm'>
+                No exercises added yet
+              </Text>
+            </Surface>
+          )}
+        </View>
 
         {/* Action Buttons */}
         <View className='px-4 pt-4 gap-3'>

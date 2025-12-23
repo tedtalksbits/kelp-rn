@@ -28,6 +28,7 @@ const MAX_TRANSLATE_Y = -SCREEN_HEIGHT + 50;
 type BottomSheetContentProps = {
   children: React.ReactNode;
   title?: string;
+  titleClassName?: string;
   description?: string;
   style?: ViewStyle;
   rBottomSheetStyle: any;
@@ -40,6 +41,7 @@ type BottomSheetContentProps = {
 const BottomSheetContent = ({
   children,
   title,
+  titleClassName,
   description,
   style,
   rBottomSheetStyle,
@@ -114,7 +116,11 @@ const BottomSheetContent = ({
             paddingBottom: 2,
           }}
         >
-          <Text variant='headline' style={{ textAlign: 'center' }}>
+          <Text
+            variant='headline'
+            style={{ textAlign: 'center' }}
+            className={titleClassName}
+          >
             {title}
           </Text>
         </View>
@@ -139,7 +145,7 @@ const BottomSheetContent = ({
       {/* Content now wrapped in a ScrollView */}
       <ScrollView
         style={{ flex: 1 }}
-        contentContainerStyle={{ padding: 16, paddingBottom: 40 }}
+        contentContainerStyle={{ paddingBottom: 120 }}
         keyboardShouldPersistTaps='handled'
         showsVerticalScrollIndicator={false}
       >
@@ -156,6 +162,7 @@ type BottomSheetProps = {
   snapPoints?: number[];
   enableBackdropDismiss?: boolean;
   title?: string;
+  titleClassName?: string;
   description?: string;
   style?: ViewStyle;
   disablePanGesture?: boolean;
@@ -168,6 +175,7 @@ export function BottomSheet({
   snapPoints = [0.3, 0.6, 0.9],
   enableBackdropDismiss = true,
   title,
+  titleClassName,
   description,
   style,
   disablePanGesture = false,
@@ -339,6 +347,7 @@ export function BottomSheet({
             <BottomSheetContent
               children={children}
               title={title}
+              titleClassName={titleClassName}
               description={description}
               style={style}
               rBottomSheetStyle={rBottomSheetStyle}
@@ -350,6 +359,7 @@ export function BottomSheet({
               <BottomSheetContent
                 children={children}
                 title={title}
+                titleClassName={titleClassName}
                 description={description}
                 style={style}
                 rBottomSheetStyle={rBottomSheetStyle}

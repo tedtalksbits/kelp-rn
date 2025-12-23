@@ -165,9 +165,7 @@ export default function ProfileScreen() {
         <View className='flex flex-row justify-between items-center mb-4'>
           <View className='flex flex-row items-center gap-2'>
             <Calendar size={16} color='#a3e635' />
-            <Text className='text-white font-bold uppercase text-sm'>
-              Schedule
-            </Text>
+            <Text className='font-bold uppercase text-sm'>Schedule</Text>
           </View>
           {userProfile.preferred_workout_time && (
             <Text className='text-muted-foreground text-xs'>
@@ -205,9 +203,7 @@ export default function ProfileScreen() {
         <View>
           <View className='flex flex-row items-center gap-2 mb-3'>
             <Target size={16} color='#ef4444' />
-            <Text className='text-white font-bold uppercase text-sm'>
-              Goals
-            </Text>
+            <Text className='font-bold uppercase text-sm'>Goals</Text>
           </View>
           <View className='flex flex-row flex-wrap gap-2'>
             {userProfile.goals.map((g) => (
@@ -221,9 +217,7 @@ export default function ProfileScreen() {
             <View>
               <View className='flex flex-row items-center gap-2 mb-3'>
                 <Dumbbell size={16} color='#3b82f6' />
-                <Text className='text-white font-bold uppercase text-sm'>
-                  Equipment
-                </Text>
+                <Text className='font-bold uppercase text-sm'>Equipment</Text>
               </View>
               <View className='flex flex-row flex-wrap gap-2'>
                 {userProfile.available_equipment.map((e) => (
@@ -237,9 +231,7 @@ export default function ProfileScreen() {
         <View>
           <View className='flex flex-row items-center gap-2 mb-3'>
             <Activity size={16} color='#a855f7' />
-            <Text className='text-white font-bold uppercase text-sm'>
-              Focus Areas
-            </Text>
+            <Text className='font-bold uppercase text-sm'>Focus Areas</Text>
           </View>
           <View className='flex flex-row flex-wrap gap-2'>
             {userProfile.target_areas.map((a) => (
