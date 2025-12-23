@@ -1,7 +1,14 @@
 import React, { useState } from 'react';
 import { ScreenScrollView } from '@/components/screen-scroll-view';
 import { Text } from '@/components/text';
-import { View, Pressable, ScrollView, Alert, ColorValue } from 'react-native';
+import {
+  View,
+  Pressable,
+  ScrollView,
+  Alert,
+  ColorValue,
+  Image,
+} from 'react-native';
 import { Surface } from '@/components/surface';
 import { Button } from '@/components/button';
 import { BottomSheet, useBottomSheet } from '@/components/bottom-sheet';
@@ -32,11 +39,22 @@ import {
   Heart,
   Plus,
   Loader2,
+  SignalLow,
+  SignalMedium,
+  SignalHigh,
 } from 'lucide-react-native';
 
 import { LinearGradient } from 'expo-linear-gradient';
-
+import HeroImage from '../../../../assets/hero.png';
+import { withUniwind } from 'uniwind';
+import { GlassView } from 'expo-glass-effect';
 type WorkoutFilter = 'user' | 'favorites' | 'kelp';
+
+const StyledLowSignalIcon = withUniwind(SignalLow);
+const StyledMediumSignalIcon = withUniwind(SignalMedium);
+const StyledHighSignalIcon = withUniwind(SignalHigh);
+const StyledGlassView = withUniwind(GlassView);
+const StyledClock = withUniwind(Clock);
 
 export default function WorkoutsScreen() {
   const [workoutFilter, setWorkoutFilter] = useState<WorkoutFilter>('user');
@@ -257,6 +275,19 @@ function WorkoutCard({
     }
   };
 
+  const getIntensityIcon = (intensity?: string) => {
+    switch (intensity) {
+      case 'low':
+        return <StyledLowSignalIcon size={14} className='text-foreground' />;
+      case 'medium':
+        return <StyledMediumSignalIcon size={14} className='text-foreground' />;
+      case 'high':
+        return <StyledHighSignalIcon size={14} className='text-foreground' />;
+      default:
+        return <Heart size={14} className='text-foreground' />;
+    }
+  };
+
   const gradientColors = parseGradientColors(workout.color);
   const gradientDirection = parseGradientDirection(workout.color);
 
@@ -286,23 +317,21 @@ function WorkoutCard({
           <View className='relative z-10 '>
             <View className='flex flex-row gap-2 mb-3 flex-wrap'>
               {workout.intensity && (
-                <View
-                  className={cn(
-                    'px-2 py-1 rounded',
-                    getIntensityColor(workout.intensity)
-                  )}
+                <StyledGlassView
+                  className={cn('px-2 py-1 rounded flex flex-row items-center')}
                 >
+                  {getIntensityIcon(workout.intensity)}
                   <Text className='text-[10px] font-bold uppercase tracking-wider'>
                     {workout.intensity}
                   </Text>
-                </View>
+                </StyledGlassView>
               )}
               {workout.estimated_duration_minutes && (
-                <View className='px-2 py-1 rounded bg-black/30'>
+                <StyledGlassView className='px-2 py-1 rounded bg-black/30'>
                   <Text className='text-[10px] font-bold uppercase tracking-wider'>
                     {workout.estimated_duration_minutes} min
                   </Text>
-                </View>
+                </StyledGlassView>
               )}
             </View>
 
@@ -339,35 +368,36 @@ function WorkoutCard({
           )}
 
           {/* Stats */}
-          <View className='flex flex-row gap-2 mb-6 flex-wrap'>
+          <View className='flex flex-row gap-2 my-6 flex-wrap'>
             {workout.intensity && (
               <View
                 className={cn(
-                  'px-3 py-2 rounded-lg',
+                  'px-2 py-1 rounded-lg flex flex-row items-center',
                   getIntensityColor(workout.intensity)
                 )}
               >
+                {getIntensityIcon(workout.intensity)}
                 <Text className='text-xs font-bold uppercase'>
                   {workout.intensity}
                 </Text>
               </View>
             )}
             {workout.estimated_duration_minutes && (
-              <Surface className='px-3 py-2 rounded-lg flex flex-row items-center gap-2'>
-                <Clock size={14} color='#71717a' />
-                <Text className='text-xs font-bold'>
+              <Surface className='px-2 py-1 rounded-lg flex flex-row items-center gap-2'>
+                <StyledClock size={14} className='text-foreground' />
+                <Text className='text-xs font-bold uppercase'>
                   {workout.estimated_duration_minutes} min
                 </Text>
               </Surface>
             )}
-            {workout.focus_area && (
-              <Surface className='px-3 py-2 rounded-lg flex flex-row items-center gap-2'>
+            {/* {workout.focus_area && (
+              <Surface className='px-2 py-1 rounded-lg flex flex-row items-center gap-2'>
                 <Target size={14} color='#71717a' />
                 <Text className='text-xs font-bold uppercase'>
                   {workout.focus_area.replace('_', ' ')}
                 </Text>
               </Surface>
-            )}
+            )} */}
           </View>
 
           {/* Exercises */}
@@ -378,39 +408,59 @@ function WorkoutCard({
           {templateDetail?.exercises && templateDetail.exercises.length > 0 ? (
             <View className='gap-3 mb-6'>
               {templateDetail.exercises.map((ex, idx: number) => (
-                <Surface key={ex.id} className='p-4 rounded-lg'>
-                  <View className='flex flex-row items-start justify-between mb-2'>
-                    <View className='flex-1'>
-                      <Text className='font-bold uppercase text-base mb-1'>
+                <Surface
+                  key={ex.id}
+                  className={cn('p-0 rounded-none bg-transparent', {
+                    'pb-3 border-b border-border':
+                      idx !== templateDetail.exercises.length - 1,
+                    'pb-0': idx === templateDetail.exercises.length - 1,
+                  })}
+                >
+                  <View className='flex flex-row items-start justify-between gap-4'>
+                    <View className='rounded-xs overflow-hidden'>
+                      <Image
+                        source={
+                          ex.exercise?.demo_gif_url
+                            ? { uri: ex.exercise.demo_gif_url }
+                            : HeroImage
+                        }
+                        style={{ width: 65, height: 65, borderRadius: 8 }}
+                      />
+                    </View>
+                    <View className='flex-1 gap-1'>
+                      <Text className='font-bold uppercase text-base'>
                         {ex.exercise?.name || 'Exercise'}
                       </Text>
-                      {ex.exercise?.target_muscle && (
-                        <Text className='text-xs text-muted-foreground uppercase'>
-                          {ex.exercise.target_muscle}
-                        </Text>
-                      )}
+
+                      <View className='flex flex-row items-center gap-2'>
+                        {ex.exercise?.target_muscle && (
+                          <Text className='text-xs text-muted-foreground uppercase font-bold'>
+                            {ex.exercise.target_muscle}
+                          </Text>
+                        )}
+                      </View>
+
+                      {/* Sets/Reps Info */}
+                      <View className='flex flex-row gap-2'>
+                        {ex.target_sets && (
+                          <Text className='text-xs text-muted-foreground uppercase'>
+                            {ex.target_sets} sets
+                          </Text>
+                        )}
+                        {ex.target_reps && (
+                          <Text className='text-xs text-muted-foreground uppercase'>
+                            {ex.target_reps} reps
+                          </Text>
+                        )}
+                      </View>
                     </View>
                   </View>
 
-                  {/* Sets/Reps Info */}
-                  <View className='flex flex-row gap-4 mt-2'>
-                    {ex.target_sets && (
-                      <Text className='text-sm text-muted-foreground'>
-                        {ex.target_sets} sets
-                      </Text>
-                    )}
-                    {ex.target_reps && (
-                      <Text className='text-sm text-muted-foreground'>
-                        {ex.target_reps} reps
-                      </Text>
-                    )}
-                  </View>
-
-                  {ex.notes && (
+                  {/* {ex.notes && (
                     <Text className='text-xs text-muted-foreground mt-2'>
                       {ex.notes}
                     </Text>
-                  )}
+                  )} */}
                 </Surface>
               ))}
             </View>
