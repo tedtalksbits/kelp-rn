@@ -1,5 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Pressable, Alert, ScrollView, Image } from 'react-native';
+import {
+  View,
+  Pressable,
+  Alert,
+  ScrollView,
+  Image,
+  TextInput,
+} from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Text } from '@/components/text';
 import { Button } from '@/components/button';
@@ -10,13 +17,21 @@ import {
   useCompleteWorkoutSession,
 } from '@/features/workouts/hooks/use-workout-sessions';
 import { useUpdateExerciseLog } from '@/features/workouts/hooks/use-exercise-logs';
-import { X, SkipForward, SkipBack, Check, Info } from 'lucide-react-native';
+import {
+  X,
+  SkipForward,
+  SkipBack,
+  Check,
+  Info,
+  Plus,
+  Minus,
+} from 'lucide-react-native';
 import { cn } from '@/libs/utils';
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Circle } from 'react-native-svg';
 // import { Image } from 'expo-image';
 
-type WorkoutState = 'get-ready' | 'exercise' | 'rest' | 'completed';
+type WorkoutState = 'get-ready' | 'exercise' | 'rest' | 'summary' | 'completed';
 
 export default function WorkoutSessionScreen() {
   const { sessionId } = useLocalSearchParams<{ sessionId: string }>();
@@ -26,7 +41,11 @@ export default function WorkoutSessionScreen() {
   const [workoutState, setWorkoutState] = useState<WorkoutState>('get-ready');
   const [timer, setTimer] = useState(0);
   const [sessionStartTime] = useState(Date.now());
-
+  const [exerciseAdjustments, setExerciseAdjustments] = useState<
+    Record<string, { sets: number; reps: number }>
+  >({});
+  const [perceivedDifficulty, setPerceivedDifficulty] = useState<number>(3);
+  const [userNotes, setUserNotes] = useState<string>('');
   const intervalRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
   const { mutate: completeSession } = useCompleteWorkoutSession();
@@ -98,7 +117,7 @@ export default function WorkoutSessionScreen() {
   }, [workoutState, currentExerciseIndex]);
 
   const handleDone = () => {
-    // Mark exercise as completed
+    // Mark exercise as completed with current timer and planned sets/reps
     if (currentExercise?.id) {
       updateExerciseLog({
         id: currentExercise.id,
@@ -109,13 +128,23 @@ export default function WorkoutSessionScreen() {
           reps_completed: currentExercise.reps_planned,
         },
       });
+
+      // Initialize adjustment state with planned values
+      setExerciseAdjustments((prev) => ({
+        ...prev,
+        [currentExercise.id]: {
+          sets: currentExercise.sets_planned || 0,
+          reps: currentExercise.reps_planned || 0,
+        },
+      }));
     }
 
     // Move to rest or next exercise
     if (currentExerciseIndex < totalExercises - 1) {
       setWorkoutState('rest');
     } else {
-      handleCompleteWorkout();
+      // Last exercise done, go to summary
+      setWorkoutState('summary');
     }
   };
 
@@ -154,8 +183,33 @@ export default function WorkoutSessionScreen() {
     }
   };
 
-  const handleCompleteWorkout = () => {
+  const handleAdjustExercise = (
+    logId: string,
+    field: 'sets' | 'reps',
+    value: number
+  ) => {
+    setExerciseAdjustments((prev) => ({
+      ...prev,
+      [logId]: {
+        sets: field === 'sets' ? value : (prev[logId]?.sets ?? 0),
+        reps: field === 'reps' ? value : (prev[logId]?.reps ?? 0),
+      },
+    }));
+  };
+
+  const handleCompleteWorkout = async () => {
     if (!sessionId) return;
+
+    // Apply all exercise adjustments
+    for (const [logId, adjustment] of Object.entries(exerciseAdjustments)) {
+      await updateExerciseLog({
+        id: logId,
+        updates: {
+          sets_completed: adjustment.sets,
+          reps_completed: adjustment.reps,
+        },
+      });
+    }
 
     const durationMinutes = Math.round((Date.now() - sessionStartTime) / 60000);
 
@@ -163,6 +217,8 @@ export default function WorkoutSessionScreen() {
       {
         sessionId,
         durationMinutes,
+        perceivedDifficulty,
+        userNotes: userNotes || undefined,
       },
       {
         onSuccess: () => {
@@ -222,6 +278,181 @@ export default function WorkoutSessionScreen() {
             Back to Home
           </Text>
         </Button>
+      </ScreenView>
+    );
+  }
+
+  // Summary State
+  if (workoutState === 'summary') {
+    const completedExercises = exercises.filter((ex) => ex.completed);
+
+    return (
+      <ScreenView className='bg-background'>
+        <ScrollView className='flex-1 px-6 pt-12 pb-6'>
+          <Text className='text-3xl font-black uppercase mb-6'>
+            Workout Summary
+          </Text>
+          <Text className='text-muted-foreground mb-8'>
+            Review and adjust your completed exercises
+          </Text>
+
+          {/* Exercise Adjustments */}
+          <View className='gap-4 mb-8'>
+            {completedExercises.map((exercise) => {
+              const adjustment = exerciseAdjustments[exercise.id] || {
+                sets: exercise.sets_planned || 0,
+                reps: exercise.reps_planned || 0,
+              };
+
+              return (
+                <Surface key={exercise.id} className='p-4 rounded-lg'>
+                  <Text className='font-bold text-base mb-4'>
+                    {exercise.exercise?.name || 'Exercise'}
+                  </Text>
+
+                  <View className='flex flex-row gap-4'>
+                    {/* Sets Adjustment */}
+                    <View className='flex-1'>
+                      <Text className='text-xs text-muted-foreground mb-2 uppercase'>
+                        Sets
+                      </Text>
+                      <View className='flex flex-row items-center gap-2'>
+                        <Pressable
+                          onPress={() =>
+                            handleAdjustExercise(
+                              exercise.id,
+                              'sets',
+                              Math.max(0, adjustment.sets - 1)
+                            )
+                          }
+                          className='bg-secondary w-10 h-10 rounded-lg items-center justify-center'
+                        >
+                          <Minus size={20} color='#ffffff' />
+                        </Pressable>
+                        <Text className='text-2xl font-bold flex-1 text-center'>
+                          {adjustment.sets}
+                        </Text>
+                        <Pressable
+                          onPress={() =>
+                            handleAdjustExercise(
+                              exercise.id,
+                              'sets',
+                              adjustment.sets + 1
+                            )
+                          }
+                          className='bg-secondary w-10 h-10 rounded-lg items-center justify-center'
+                        >
+                          <Plus size={20} color='#ffffff' />
+                        </Pressable>
+                      </View>
+                    </View>
+
+                    {/* Reps Adjustment */}
+                    <View className='flex-1'>
+                      <Text className='text-xs text-muted-foreground mb-2 uppercase'>
+                        Reps
+                      </Text>
+                      <View className='flex flex-row items-center gap-2'>
+                        <Pressable
+                          onPress={() =>
+                            handleAdjustExercise(
+                              exercise.id,
+                              'reps',
+                              Math.max(0, adjustment.reps - 1)
+                            )
+                          }
+                          className='bg-secondary w-10 h-10 rounded-lg items-center justify-center'
+                        >
+                          <Minus size={20} color='#ffffff' />
+                        </Pressable>
+                        <Text className='text-2xl font-bold flex-1 text-center'>
+                          {adjustment.reps}
+                        </Text>
+                        <Pressable
+                          onPress={() =>
+                            handleAdjustExercise(
+                              exercise.id,
+                              'reps',
+                              adjustment.reps + 1
+                            )
+                          }
+                          className='bg-secondary w-10 h-10 rounded-lg items-center justify-center'
+                        >
+                          <Plus size={20} color='#ffffff' />
+                        </Pressable>
+                      </View>
+                    </View>
+                  </View>
+                </Surface>
+              );
+            })}
+          </View>
+
+          {/* Perceived Difficulty */}
+          <Surface className='p-4 rounded-lg mb-4'>
+            <Text className='font-bold text-base mb-4'>
+              How difficult was this workout?
+            </Text>
+            <View className='flex flex-row justify-between'>
+              {[1, 2, 3, 4, 5].map((level) => (
+                <Pressable
+                  key={level}
+                  onPress={() => setPerceivedDifficulty(level)}
+                  className={cn(
+                    'w-14 h-14 rounded-full items-center justify-center border-2',
+                    perceivedDifficulty === level
+                      ? 'bg-primary border-primary'
+                      : 'bg-secondary border-border'
+                  )}
+                >
+                  <Text
+                    className={cn(
+                      'text-lg font-bold',
+                      perceivedDifficulty === level
+                        ? 'text-primary-foreground'
+                        : 'text-muted-foreground'
+                    )}
+                  >
+                    {level}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+            <View className='flex flex-row justify-between mt-2'>
+              <Text className='text-xs text-muted-foreground'>Easy</Text>
+              <Text className='text-xs text-muted-foreground'>Hard</Text>
+            </View>
+          </Surface>
+
+          {/* User Notes */}
+          <Surface className='p-4 rounded-lg mb-8'>
+            <Text className='font-bold text-base mb-4'>Notes (Optional)</Text>
+            <TextInput
+              value={userNotes}
+              onChangeText={setUserNotes}
+              placeholder='How did you feel? Any observations?'
+              placeholderTextColor='#71717a'
+              multiline
+              numberOfLines={4}
+              className='bg-background rounded-lg p-3 text-foreground min-h-24'
+              style={{ textAlignVertical: 'top' }}
+            />
+          </Surface>
+
+          {/* Complete Button */}
+          <Button
+            onPress={handleCompleteWorkout}
+            size='lg'
+            className='w-full mb-6'
+          >
+            <View className='flex flex-row items-center gap-2'>
+              <Check size={20} color='#000000' />
+              <Text className='text-primary-foreground font-bold text-lg'>
+                Complete Workout
+              </Text>
+            </View>
+          </Button>
+        </ScrollView>
       </ScreenView>
     );
   }

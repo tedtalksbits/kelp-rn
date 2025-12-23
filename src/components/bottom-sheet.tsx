@@ -1,5 +1,5 @@
 import { Text } from './text';
-import { View } from 'react-native';
+import { Alert, View } from 'react-native';
 import { useKeyboardHeight } from '@/hooks/use-keyboard-height'; // Make sure this path is correct
 import React, { useEffect } from 'react';
 import {
@@ -31,7 +31,7 @@ type BottomSheetContentProps = {
   description?: string;
   style?: ViewStyle;
   rBottomSheetStyle: any;
-
+  onClose?: () => void;
   onHandlePress?: () => void;
 };
 
@@ -44,6 +44,7 @@ const BottomSheetContent = ({
   style,
   rBottomSheetStyle,
   onHandlePress,
+  onClose,
 }: BottomSheetContentProps) => {
   return (
     <Animated.View
@@ -60,7 +61,7 @@ const BottomSheetContent = ({
         rBottomSheetStyle,
         style,
       ]}
-      className='rounded-t-4xl bg-secondary'
+      className='rounded-t-4xl bg-popover relative'
     >
       {/* Handle */}
       <TouchableWithoutFeedback onPress={onHandlePress}>
@@ -82,6 +83,27 @@ const BottomSheetContent = ({
           />
         </View>
       </TouchableWithoutFeedback>
+
+      {/* close button */}
+      {onClose && (
+        <TouchableWithoutFeedback onPress={onClose}>
+          <View
+            style={{
+              position: 'absolute',
+              top: 16,
+              right: 16,
+              width: 32,
+              height: 32,
+              borderRadius: 16,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+            className='bg-muted/50'
+          >
+            <Text className='text-foreground text-lg font-bold'>×</Text>
+          </View>
+        </TouchableWithoutFeedback>
+      )}
 
       {/* Title */}
       {title && (
@@ -321,6 +343,7 @@ export function BottomSheet({
               style={style}
               rBottomSheetStyle={rBottomSheetStyle}
               onHandlePress={() => runOnJS(handlePress)()}
+              onClose={() => handleBackdropPress()}
             />
           ) : (
             <GestureDetector gesture={gesture}>
@@ -331,6 +354,7 @@ export function BottomSheet({
                 style={style}
                 rBottomSheetStyle={rBottomSheetStyle}
                 onHandlePress={() => runOnJS(handlePress)()}
+                onClose={() => handleBackdropPress()}
               />
             </GestureDetector>
           )}

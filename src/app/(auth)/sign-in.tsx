@@ -9,11 +9,11 @@ import ParallaxScrollView from '@/components/parallax-scroll-view';
 import { Input } from '@/components/input';
 import { Button } from '@/components/button';
 import { Link, router } from 'expo-router';
-import { useSignIn } from '@/features/auth/hooks/use-sign-in';
 import { withUniwind } from 'uniwind';
 import { AlertCircle } from 'lucide-react-native';
 import { cn } from '@/libs/utils';
 import { useHaptics } from '@/components/use-haptics';
+import { useSignIn } from '@/features/auth/hooks/use-auth';
 const StyledAlertIcon = withUniwind(AlertCircle);
 export default function SignInScreen() {
   const haptics = useHaptics();
