@@ -32,6 +32,14 @@ src/
 ├── components/                   # Reusable UI components
 ├── contexts/                     # React contexts (theme, etc.)
 ├── features/                     # Feature-based modules
+│   ├── onboarding/              # User onboarding wizard
+│   │   ├── components/
+│   │   │   ├── steps/           # Individual step components
+│   │   │   └── onboarding-wizard.tsx
+│   │   ├── hooks/
+│   │   │   └── use-onboarding.ts
+│   │   └── types/
+│   │       └── onboarding.types.ts
 │   ├── user-profile/            # Profile management
 │   └── workouts/                # Workout features
 ├── hooks/                        # Custom React hooks
@@ -46,7 +54,71 @@ src/
 
 ## Key Features & Patterns
 
-### 1. Workout Session Flow
+### 1. Onboarding Wizard
+
+**Location**: `src/features/onboarding/`
+
+**Architecture**:
+
+- Modular step-based system - easy to add/remove steps
+- Each step is a separate component with single responsibility
+- Centralized state management via `useOnboarding` hook
+- Progress indicator and validation per step
+
+**Steps** (8 total):
+
+1. **Name**: Text input for user's name
+2. **Fitness Level**: Selection (beginner/intermediate/advanced)
+3. **Goals & Target Areas**: Multi-select chips for goals and body areas
+4. **Equipment**: Multi-select equipment availability
+5. **Physical Stats**: Age, weight, height selectors
+6. **Schedule**: Workout days + preferred time
+7. **Limitations**: Physical limitation selection (optional)
+8. **Notifications**: Push notification permission request
+
+**Data Flow**:
+
+```typescript
+// Entry Point (src/app/index.tsx)
+const { data: profile } = useProfile();
+if (!profile) {
+  return <OnboardingWizard />;
+}
+
+// Wizard manages state through all steps
+const { data, updateData } = useOnboarding();
+
+// Final submission creates profile
+createProfile({
+  user_id,
+  name: data.name,
+  fitness_level: data.fitnessLevel,
+  goals: data.goals,
+  // ... all collected data
+});
+```
+
+**Step Configuration**:
+
+```typescript
+interface OnboardingStep {
+  id: string;
+  title: string;
+  component: React.ComponentType;
+  isValid: (data) => boolean;
+  canSkip?: boolean;
+}
+```
+
+**Key Patterns**:
+
+- Use BottomSheet for selectors (age, weight, height, time)
+- Multi-select chips for goals, equipment, limitations
+- Automatic device timezone detection
+- Validation before allowing next step
+- expo-notifications for push permission
+
+### 2. Workout Session Flow
 
 **Location**: `src/app/workout/[sessionId].tsx`
 

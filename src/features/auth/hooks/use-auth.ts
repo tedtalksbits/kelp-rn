@@ -47,3 +47,15 @@ export const useSignIn = () => {
     },
   });
 };
+
+export const useSignUp = () => {
+  return useMutation({
+    mutationFn: async ({ email, password }: SignInData) => {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+      });
+      return { data, error };
+    },
+  });
+};

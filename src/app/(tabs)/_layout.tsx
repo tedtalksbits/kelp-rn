@@ -25,9 +25,9 @@ export default function TabLayout() {
           },
           tabBarBackground: () =>
             Platform.OS === 'ios' ? (
-              <GlassView
-                // intensity={80}
-                // tint='dark'
+              <BlurView
+                intensity={80}
+                tint='dark'
                 style={{
                   position: 'absolute',
                   top: 0,
@@ -35,7 +35,6 @@ export default function TabLayout() {
                   bottom: 0,
                   right: 0,
                   overflow: 'hidden',
-                  borderRadius: 9999,
                 }}
               />
             ) : null,
