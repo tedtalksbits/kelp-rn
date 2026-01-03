@@ -6,6 +6,7 @@ import {
   ScrollView,
   Image,
   TextInput,
+  TouchableOpacity,
 } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Text } from '@/components/text';
@@ -29,10 +30,16 @@ import {
 import { cn } from '@/libs/utils';
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Circle } from 'react-native-svg';
+import { useCSSVariable, withUniwind } from 'uniwind';
+import { useHaptics } from '@/components/use-haptics';
+import { GlassView } from 'expo-glass-effect';
+import { Input } from '@/components/input';
 // import { Image } from 'expo-image';
 
 type WorkoutState = 'get-ready' | 'exercise' | 'rest' | 'summary' | 'completed';
-
+const StyledSkipForward = withUniwind(SkipForward);
+const StyledSkipBack = withUniwind(SkipBack);
+const StyledGlassView = withUniwind(GlassView);
 export default function WorkoutSessionScreen() {
   const { sessionId } = useLocalSearchParams<{ sessionId: string }>();
   const { data: session, isLoading } = useWorkoutSession(sessionId);
@@ -48,8 +55,13 @@ export default function WorkoutSessionScreen() {
   const [userNotes, setUserNotes] = useState<string>('');
   const intervalRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
+  const primaryColor = useCSSVariable('--color-primary');
+  const backgroundColor = useCSSVariable('--color-background');
+
   const { mutate: completeSession } = useCompleteWorkoutSession();
-  const { mutate: updateExerciseLog } = useUpdateExerciseLog();
+  const { mutateAsync: updateExerciseLog } = useUpdateExerciseLog();
+
+  const haptics = useHaptics();
 
   const exercises = session?.exercise_logs || [];
   const currentExercise = exercises[currentExerciseIndex];
@@ -62,7 +74,7 @@ export default function WorkoutSessionScreen() {
     } else if (workoutState === 'exercise') {
       setTimer(0);
     } else if (workoutState === 'rest') {
-      setTimer(60);
+      setTimer(30);
     }
   }, [workoutState, currentExerciseIndex]);
 
@@ -146,14 +158,18 @@ export default function WorkoutSessionScreen() {
       // Last exercise done, go to summary
       setWorkoutState('summary');
     }
+
+    haptics.success();
   };
 
   const handleNextExercise = () => {
     if (currentExerciseIndex < totalExercises - 1) {
       setCurrentExerciseIndex((prev) => prev + 1);
       setWorkoutState('get-ready');
+      haptics.light();
     } else {
       handleCompleteWorkout();
+      haptics.success();
     }
   };
 
@@ -161,6 +177,7 @@ export default function WorkoutSessionScreen() {
     if (currentExerciseIndex > 0) {
       setCurrentExerciseIndex((prev) => prev - 1);
       setWorkoutState('get-ready');
+      haptics.light();
     }
   };
 
@@ -195,6 +212,7 @@ export default function WorkoutSessionScreen() {
         reps: field === 'reps' ? value : (prev[logId]?.reps ?? 0),
       },
     }));
+    haptics.light();
   };
 
   const handleCompleteWorkout = async () => {
@@ -223,6 +241,7 @@ export default function WorkoutSessionScreen() {
       {
         onSuccess: () => {
           setWorkoutState('completed');
+          haptics.success();
         },
       }
     );
@@ -306,7 +325,10 @@ export default function WorkoutSessionScreen() {
 
               return (
                 <Surface key={exercise.id} className='p-4 rounded-lg'>
-                  <Text className='font-bold text-base mb-4'>
+                  <Text
+                    className='font-bold text-base mb-4 uppercase max-w-xs'
+                    numberOfLines={1}
+                  >
                     {exercise.exercise?.name || 'Exercise'}
                   </Text>
 
@@ -325,9 +347,10 @@ export default function WorkoutSessionScreen() {
                               Math.max(0, adjustment.sets - 1)
                             )
                           }
-                          className='bg-secondary w-10 h-10 rounded-lg items-center justify-center'
                         >
-                          <Minus size={20} color='#ffffff' />
+                          <StyledGlassView className='bg-foreground/10 w-10 h-10 rounded-lg items-center justify-center'>
+                            <Minus size={20} color='#ffffff' />
+                          </StyledGlassView>
                         </Pressable>
                         <Text className='text-2xl font-bold flex-1 text-center'>
                           {adjustment.sets}
@@ -340,9 +363,10 @@ export default function WorkoutSessionScreen() {
                               adjustment.sets + 1
                             )
                           }
-                          className='bg-secondary w-10 h-10 rounded-lg items-center justify-center'
                         >
-                          <Plus size={20} color='#ffffff' />
+                          <StyledGlassView className='bg-foreground/10 w-10 h-10 rounded-lg items-center justify-center'>
+                            <Plus size={20} color='#ffffff' />
+                          </StyledGlassView>
                         </Pressable>
                       </View>
                     </View>
@@ -361,9 +385,10 @@ export default function WorkoutSessionScreen() {
                               Math.max(0, adjustment.reps - 1)
                             )
                           }
-                          className='bg-secondary w-10 h-10 rounded-lg items-center justify-center'
                         >
-                          <Minus size={20} color='#ffffff' />
+                          <StyledGlassView className='bg-foreground/10 w-10 h-10 rounded-lg items-center justify-center'>
+                            <Minus size={20} color='#ffffff' />
+                          </StyledGlassView>
                         </Pressable>
                         <Text className='text-2xl font-bold flex-1 text-center'>
                           {adjustment.reps}
@@ -376,9 +401,10 @@ export default function WorkoutSessionScreen() {
                               adjustment.reps + 1
                             )
                           }
-                          className='bg-secondary w-10 h-10 rounded-lg items-center justify-center'
                         >
-                          <Plus size={20} color='#ffffff' />
+                          <StyledGlassView className='bg-foreground/10 w-10 h-10 rounded-lg items-center justify-center'>
+                            <Plus size={20} color='#ffffff' />
+                          </StyledGlassView>
                         </Pressable>
                       </View>
                     </View>
@@ -390,31 +416,37 @@ export default function WorkoutSessionScreen() {
 
           {/* Perceived Difficulty */}
           <Surface className='p-4 rounded-lg mb-4'>
-            <Text className='font-bold text-base mb-4'>
+            <Text className='font-bold text-base mb-4 uppercase'>
               How difficult was this workout?
             </Text>
             <View className='flex flex-row justify-between'>
               {[1, 2, 3, 4, 5].map((level) => (
                 <Pressable
                   key={level}
-                  onPress={() => setPerceivedDifficulty(level)}
-                  className={cn(
-                    'w-14 h-14 rounded-full items-center justify-center border-2',
-                    perceivedDifficulty === level
-                      ? 'bg-primary border-primary'
-                      : 'bg-secondary border-border'
-                  )}
+                  onPress={() => {
+                    setPerceivedDifficulty(level);
+                    haptics.light();
+                  }}
                 >
-                  <Text
+                  <StyledGlassView
                     className={cn(
-                      'text-lg font-bold',
+                      'w-14 h-14 rounded-full items-center justify-center',
                       perceivedDifficulty === level
-                        ? 'text-primary-foreground'
-                        : 'text-muted-foreground'
+                        ? 'bg-primary border-primary'
+                        : 'bg-foreground/10'
                     )}
                   >
-                    {level}
-                  </Text>
+                    <Text
+                      className={cn(
+                        'text-lg font-bold',
+                        perceivedDifficulty === level
+                          ? 'text-primary-foreground'
+                          : 'text-muted-foreground'
+                      )}
+                    >
+                      {level}
+                    </Text>
+                  </StyledGlassView>
                 </Pressable>
               ))}
             </View>
@@ -427,14 +459,13 @@ export default function WorkoutSessionScreen() {
           {/* User Notes */}
           <Surface className='p-4 rounded-lg mb-8'>
             <Text className='font-bold text-base mb-4'>Notes (Optional)</Text>
-            <TextInput
+            <Input
               value={userNotes}
               onChangeText={setUserNotes}
               placeholder='How did you feel? Any observations?'
-              placeholderTextColor='#71717a'
               multiline
               numberOfLines={4}
-              className='bg-background rounded-lg p-3 text-foreground min-h-24'
+              className='min-h-24 bg-foreground/10'
               style={{ textAlignVertical: 'top' }}
             />
           </Surface>
@@ -458,14 +489,20 @@ export default function WorkoutSessionScreen() {
   }
 
   // Get Ready State
+  // workoutState === 'get-ready'
   if (workoutState === 'get-ready') {
     return (
       <ScreenView>
         <LinearGradient
-          colors={['#3b82f6', '#1e3a8a']}
+          colors={[primaryColor as string, backgroundColor as string]}
           className='absolute inset-0'
+          start={{ x: 0, y: -3 }}
+          style={{
+            zIndex: -1,
+            position: 'absolute',
+            inset: 0,
+          }}
         />
-
         <View className='flex-1 px-6 pt-12'>
           {/* Header */}
           <View className='flex flex-row items-center justify-between mb-8'>
@@ -480,11 +517,11 @@ export default function WorkoutSessionScreen() {
 
           {/* Exercise Preview */}
           <View className='flex-1 items-center justify-center'>
-            <Text className='text-white text-5xl font-black mb-12'>
+            <Text className='text-white text-5xl font-black uppercase italic mb-12'>
               Get Ready!
             </Text>
 
-            <Text className='text-white text-2xl font-bold mb-8'>
+            <Text className='text-white text-2xl font-bold mb-16 text-center max-w-sm uppercase'>
               {currentExercise?.exercise?.name || 'Exercise'}
             </Text>
 
@@ -585,9 +622,9 @@ export default function WorkoutSessionScreen() {
 
   return (
     <ScreenView className='bg-background'>
-      <View className='flex-1 px-6 pt-12 pb-6'>
+      <View className='flex-1 pt-6'>
         {/* Header */}
-        <View className='flex flex-row items-center justify-between mb-8'>
+        <View className='flex flex-row items-center justify-between mb-6'>
           <Pressable onPress={handleExit}>
             <X size={24} color='#ffffff' />
           </Pressable>
@@ -607,10 +644,10 @@ export default function WorkoutSessionScreen() {
           contentContainerStyle={{ flexGrow: 1 }}
           showsVerticalScrollIndicator={false}
         >
-          <View className='flex-1 items-center justify-center py-8'>
+          <View className='flex-1 items-center py-4'>
             {/* Exercise Image */}
             {currentExercise?.exercise?.demo_gif_url && (
-              <View className='w-full max-w-sm aspect-square bg-muted rounded-3xl overflow-hidden mb-8'>
+              <View className='w-full max-w-sm aspect-square bg-muted rounded-3xl overflow-hidden mb-8 h-90'>
                 <Image
                   source={{ uri: currentExercise.exercise.demo_gif_url }}
                   className='w-full h-full'
@@ -621,7 +658,11 @@ export default function WorkoutSessionScreen() {
 
             {/* Exercise Name */}
             <View className='flex flex-row items-center gap-2 mb-8'>
-              <Text className='text-xl font-bold text-center'>
+              <Text
+                className='text-xl font-bold text-center uppercase max-w-xs'
+                // truncate long names
+                numberOfLines={1}
+              >
                 {currentExercise?.exercise?.name || 'Exercise'}
               </Text>
               <Info size={18} color='#71717a' />
@@ -629,60 +670,49 @@ export default function WorkoutSessionScreen() {
 
             {/* Timer/Reps Display */}
             {isRepBased ? (
-              <Text className='text-8xl font-black mb-12'>
-                X{currentExercise.reps_planned}
+              <Text className='text-4xl font-black mb-6 italic'>
+                {currentExercise.sets_planned}X{currentExercise.reps_planned}
               </Text>
             ) : (
-              <Text className='text-8xl font-black mb-12'>
+              <Text className='text-8xl font-black mb-6'>
                 {formatTime(timer)}
               </Text>
             )}
-
-            {/* DONE Button */}
-            <View className='w-full px-4 mb-8'>
-              <Button onPress={handleDone} size='lg' className='w-full'>
-                <View className='flex flex-row items-center gap-2'>
-                  <Text className='text-primary-foreground font-bold text-lg'>
-                    DONE
-                  </Text>
-                  <Check size={20} color='#000000' />
-                </View>
-              </Button>
-            </View>
-
-            {/* Navigation */}
-            <View className='flex flex-row items-center justify-between w-full px-4'>
-              <Pressable
-                onPress={handlePreviousExercise}
-                disabled={currentExerciseIndex === 0}
-                className='flex flex-row items-center gap-2 px-6 py-3 bg-secondary rounded-lg'
-              >
-                <SkipBack
-                  size={20}
-                  color={currentExerciseIndex === 0 ? '#3f3f46' : '#3b82f6'}
-                />
-                <Text
-                  className={cn(
-                    'font-bold',
-                    currentExerciseIndex === 0
-                      ? 'text-muted-foreground'
-                      : 'text-primary'
-                  )}
-                >
-                  Previous
-                </Text>
-              </Pressable>
-
-              <Pressable
-                onPress={handleSkip}
-                className='flex flex-row items-center gap-2 px-6 py-3 bg-secondary rounded-lg'
-              >
-                <Text className='text-primary font-bold'>Skip</Text>
-                <SkipForward size={20} color='#3b82f6' />
-              </Pressable>
-            </View>
           </View>
         </ScrollView>
+        {/* Navigation */}
+        <View className='flex flex-row items-center justify-between w-full px-4'>
+          <Button
+            size={'sm'}
+            onPress={handlePreviousExercise}
+            disabled={currentExerciseIndex === 0}
+            variant='ghost'
+          >
+            <View className='flex flex-row items-center gap-2'>
+              <StyledSkipBack size={16} className={cn('text-foreground')} />
+              <Text className={cn('font-bold text-xs')}>Previous</Text>
+            </View>
+          </Button>
+
+          {/* DONE Button */}
+
+          <Button onPress={handleDone} className='size-20'>
+            {/* <View className='flex flex-row items-center gap-2'>
+              <Text className='text-primary-foreground font-bold text-lg'>
+                DONE
+              </Text>
+              <Check size={20} color='#000000' />
+            </View> */}
+            <Check size={40} color='#000000' />
+          </Button>
+
+          <Button size={'sm'} onPress={handleSkip} variant='ghost'>
+            <View className='flex flex-row items-center gap-2'>
+              <Text className='font-bold text-xs'>Skip</Text>
+              <StyledSkipForward size={16} className={cn('text-foreground')} />
+            </View>
+          </Button>
+        </View>
       </View>
     </ScreenView>
   );

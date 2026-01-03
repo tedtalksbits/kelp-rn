@@ -19,6 +19,7 @@ import {
   useUserTemplate,
   useStartSessionFromTemplate,
   useCloneSystemTemplate,
+  useToggleFavoriteTemplate,
 } from '@/features/workouts/hooks/use-workout-templates';
 import {
   SystemWorkoutTemplate,
@@ -42,7 +43,9 @@ import {
   SignalLow,
   SignalMedium,
   SignalHigh,
+  Star,
 } from 'lucide-react-native';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
 
 import { LinearGradient } from 'expo-linear-gradient';
 import HeroImage from '../../../../assets/hero.png';
@@ -57,6 +60,8 @@ const StyledMediumSignalIcon = withUniwind(SignalMedium);
 const StyledHighSignalIcon = withUniwind(SignalHigh);
 const StyledGlassView = withUniwind(GlassView);
 const StyledClock = withUniwind(Clock);
+const StyledStarIcon = withUniwind(Star);
+const StyledIcon = withUniwind(FontAwesome);
 
 export default function WorkoutsScreen() {
   const [workoutFilter, setWorkoutFilter] = useState<WorkoutFilter>('user');
@@ -213,6 +218,8 @@ function WorkoutCard({
     !isSystemTemplate && isVisible ? workout.id : undefined
   );
 
+  const { mutateAsync: toggleFavorite } = useToggleFavoriteTemplate();
+
   const templateDetail = isSystemTemplate
     ? systemTemplateDetail
     : userTemplateDetail;
@@ -337,6 +344,43 @@ function WorkoutCard({
                     {workout.estimated_duration_minutes} min
                   </Text>
                 </StyledGlassView>
+              )}
+
+              {!isSystemTemplate && (
+                <Pressable
+                  className='ml-auto'
+                  onPress={async () => {
+                    await toggleFavorite({
+                      id: workout.id,
+                      isFavorite: (workout as UserWorkoutTemplate).is_favorite
+                        ? false
+                        : true,
+                    });
+                  }}
+                >
+                  <StyledGlassView
+                    className={cn(
+                      'p-2 rounded-full flex items-center justify-center',
+                      {
+                        'bg-yellow-400': (workout as UserWorkoutTemplate)
+                          .is_favorite,
+                      }
+                    )}
+                  >
+                    <StyledIcon
+                      name={
+                        (workout as UserWorkoutTemplate).is_favorite
+                          ? 'star'
+                          : 'star-o'
+                      }
+                      size={14}
+                      className={cn('text-foreground', {
+                        'text-yellow-400': (workout as UserWorkoutTemplate)
+                          .is_favorite,
+                      })}
+                    />
+                  </StyledGlassView>
+                </Pressable>
               )}
             </View>
 

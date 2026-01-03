@@ -13,6 +13,7 @@ import type {
   SystemTemplateExercise,
 } from '@/libs/supabase/types/database.types';
 import { supabase } from '@/libs/supabase/supabase';
+import { useHaptics } from '@/components/use-haptics';
 
 // ============================================
 // SYSTEM TEMPLATES (Read-Only)
@@ -162,6 +163,9 @@ export function useCreateUserTemplate() {
       queryClient.invalidateQueries({
         queryKey: ['user-templates', data.user_id],
       });
+      queryClient.invalidateQueries({ queryKey: ['user-template', data.id] });
+      queryClient.invalidateQueries({ queryKey: ['system-templates'] });
+      queryClient.invalidateQueries({ queryKey: ['user-templates'] });
     },
   });
 }
@@ -188,10 +192,9 @@ export function useUpdateUserTemplate() {
       return data;
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({
-        queryKey: ['user-templates', data.user_id],
-      });
       queryClient.invalidateQueries({ queryKey: ['user-template', data.id] });
+      queryClient.invalidateQueries({ queryKey: ['system-templates'] });
+      queryClient.invalidateQueries({ queryKey: ['user-templates'] });
     },
   });
 }
@@ -211,16 +214,16 @@ export function useDeleteUserTemplate() {
       return { id, userId };
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({
-        queryKey: ['user-templates', data.userId],
-      });
       queryClient.invalidateQueries({ queryKey: ['user-template', data.id] });
+      queryClient.invalidateQueries({ queryKey: ['system-templates'] });
+      queryClient.invalidateQueries({ queryKey: ['user-templates'] });
     },
   });
 }
 
 export function useToggleFavoriteTemplate() {
   const queryClient = useQueryClient();
+  const haptics = useHaptics();
 
   return useMutation({
     mutationFn: async ({
@@ -230,10 +233,15 @@ export function useToggleFavoriteTemplate() {
       id: string;
       isFavorite: boolean;
     }) => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
       const { data, error } = await supabase
         .from('kelp_user_workout_templates')
         .update({ is_favorite: isFavorite })
         .eq('id', id)
+        .eq('user_id', user.id)
         .select()
         .single();
 
@@ -241,10 +249,11 @@ export function useToggleFavoriteTemplate() {
       return data as UserWorkoutTemplate;
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({
-        queryKey: ['user-templates', data.user_id],
-      });
       queryClient.invalidateQueries({ queryKey: ['user-template', data.id] });
+
+      queryClient.invalidateQueries({ queryKey: ['system-templates'] });
+      queryClient.invalidateQueries({ queryKey: ['user-templates'] });
+      haptics.light();
     },
   });
 }
@@ -271,6 +280,8 @@ export function useCreateTemplateExercise() {
       queryClient.invalidateQueries({
         queryKey: ['user-template', data.template_id],
       });
+      queryClient.invalidateQueries({ queryKey: ['system-templates'] });
+      queryClient.invalidateQueries({ queryKey: ['user-templates'] });
     },
   });
 }
@@ -300,6 +311,8 @@ export function useUpdateTemplateExercise() {
       queryClient.invalidateQueries({
         queryKey: ['user-template', data.template_id],
       });
+      queryClient.invalidateQueries({ queryKey: ['system-templates'] });
+      queryClient.invalidateQueries({ queryKey: ['user-templates'] });
     },
   });
 }
@@ -327,6 +340,8 @@ export function useDeleteTemplateExercise() {
       queryClient.invalidateQueries({
         queryKey: ['user-template', data.templateId],
       });
+      queryClient.invalidateQueries({ queryKey: ['system-templates'] });
+      queryClient.invalidateQueries({ queryKey: ['user-templates'] });
     },
   });
 }
@@ -361,9 +376,7 @@ export function useCloneSystemTemplate() {
       return data as string; // Returns new user template ID
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: ['user-templates', variables.userId],
-      });
+      queryClient.invalidateQueries({ queryKey: ['user-templates'] });
     },
   });
 }
@@ -394,9 +407,7 @@ export function useDuplicateUserTemplate() {
       return data; // Returns new template ID
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: ['user-templates', variables.userId],
-      });
+      queryClient.invalidateQueries({ queryKey: ['user-templates'] });
     },
   });
 }

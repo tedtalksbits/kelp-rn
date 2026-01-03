@@ -30,6 +30,7 @@ const buttonVariants = cva('flex flex-row items-center justify-center', {
       sm: 'h-9 px-3',
       lg: 'h-11 px-8',
       icon: 'h-10 w-10',
+      'icon-xl': 'h-14 w-14',
     },
     type: {
       pill: 'rounded-[999px]',

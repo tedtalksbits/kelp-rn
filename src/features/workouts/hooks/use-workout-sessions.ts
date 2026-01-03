@@ -241,6 +241,9 @@ export function useCompleteWorkoutSession() {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({
+        queryKey: ['weekly-activity'],
+      });
+      queryClient.invalidateQueries({
         queryKey: ['workout-sessions', data.user_id],
       });
       queryClient.invalidateQueries({ queryKey: ['workout-session', data.id] });

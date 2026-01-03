@@ -16,7 +16,7 @@ export interface WeeklyActivityDay {
  */
 export function useWeeklyActivity(userId?: string, weekStart?: string) {
   return useQuery({
-    queryKey: ['weekly-activity', userId, weekStart],
+    queryKey: ['weekly-activity'],
     queryFn: async (): Promise<WeeklyActivityDay[]> => {
       if (!userId) throw new Error('User ID is required');
 
