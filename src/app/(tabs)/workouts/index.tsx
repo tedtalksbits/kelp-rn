@@ -48,6 +48,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import HeroImage from '../../../../assets/hero.png';
 import { withUniwind } from 'uniwind';
 import { GlassView } from 'expo-glass-effect';
+import { CreateTemplateDialog } from '@/features/workouts/components/create-template-dialog';
+
 type WorkoutFilter = 'user' | 'favorites' | 'kelp';
 
 const StyledLowSignalIcon = withUniwind(SignalLow);
@@ -76,10 +78,13 @@ export default function WorkoutsScreen() {
     <ScreenScrollView className='pt-12 pb-24'>
       <View className='flex flex-row items-center justify-between mb-6'>
         <Text className='text-3xl font-black uppercase'>Library</Text>
-        {/* TODO: Add CreateTemplateDialog */}
-        <Button size='icon' variant='ghost'>
-          <Plus size={24} color='#ffffff' />
-        </Button>
+        <CreateTemplateDialog
+          trigger={
+            <Button size='icon' variant='ghost'>
+              <Plus size={24} color='#ffffff' />
+            </Button>
+          }
+        />
       </View>
 
       {/* Filter Tabs */}

@@ -5,6 +5,9 @@ import { Button } from '@/components/button';
 import { Surface } from '@/components/surface';
 import type { OnboardingStepProps } from '../../types/onboarding.types';
 import { BottomSheet } from '@/components/bottom-sheet';
+import { HeightSelectorSheet } from '@/components/height-selector-sheet';
+import { WeightSelectorSheet } from '@/components/weight-selector-sheet';
+import { AgeSelectorSheet } from '@/components/age-selector-sheet';
 
 export function StepPhysicalStats({
   data,
@@ -35,40 +38,61 @@ export function StepPhysicalStats({
 
         <View className='gap-4'>
           {/* Age Selector */}
-          <Pressable onPress={() => setAgeSheetOpen(true)}>
-            <Surface className='p-4 border-2 border-border'>
-              <Text className='text-xs text-muted-foreground mb-1 uppercase'>
-                Age
-              </Text>
-              <Text className='text-2xl font-bold'>
-                {data.age || 'Select age'}
-              </Text>
-            </Surface>
-          </Pressable>
+          <AgeSelectorSheet
+            value={data.age || 25}
+            onChange={(age, close) => {
+              updateData({ age });
+              close();
+            }}
+            trigger={
+              <Surface className='p-4 border-2 border-border'>
+                <Text className='text-xs text-muted-foreground mb-1 uppercase'>
+                  Age
+                </Text>
+                <Text className='text-2xl font-bold'>
+                  {data.age || 'Select age'}
+                </Text>
+              </Surface>
+            }
+          />
 
           {/* Weight Selector */}
-          <Pressable onPress={() => setWeightSheetOpen(true)}>
-            <Surface className='p-4 border-2 border-border'>
-              <Text className='text-xs text-muted-foreground mb-1 uppercase'>
-                Weight
-              </Text>
-              <Text className='text-2xl font-bold'>
-                {data.weight ? `${data.weight} kg` : 'Select weight'}
-              </Text>
-            </Surface>
-          </Pressable>
+          <WeightSelectorSheet
+            value={data.weight || 70}
+            onChange={(weight, close) => {
+              updateData({ weight });
+              close();
+            }}
+            trigger={
+              <Surface className='p-4 border-2 border-border'>
+                <Text className='text-xs text-muted-foreground mb-1 uppercase'>
+                  Weight
+                </Text>
+                <Text className='text-2xl font-bold'>
+                  {data.weight ? `${data.weight} kg` : 'Select weight'}
+                </Text>
+              </Surface>
+            }
+          />
 
           {/* Height Selector */}
-          <Pressable onPress={() => setHeightSheetOpen(true)}>
-            <Surface className='p-4 border-2 border-border'>
-              <Text className='text-xs text-muted-foreground mb-1 uppercase'>
-                Height
-              </Text>
-              <Text className='text-2xl font-bold'>
-                {data.height ? `${data.height} cm` : 'Select height'}
-              </Text>
-            </Surface>
-          </Pressable>
+          <HeightSelectorSheet
+            trigger={
+              <Surface className='p-4 border-2 border-border'>
+                <Text className='text-xs text-muted-foreground mb-1 uppercase'>
+                  Height
+                </Text>
+                <Text className='text-2xl font-bold'>
+                  {data.height ? `${data.height} cm` : 'Select height'}
+                </Text>
+              </Surface>
+            }
+            value={data.height || 170}
+            onChange={(height, close) => {
+              updateData({ height });
+              close();
+            }}
+          />
         </View>
       </View>
 
@@ -79,7 +103,9 @@ export function StepPhysicalStats({
           </Text>
         </Button>
         <Button size='lg' variant='secondary' onPress={goToPrevious}>
-          <Text className='text-foreground font-bold text-lg'>Back</Text>
+          <Text className='text-secondary-foreground font-bold text-lg'>
+            Back
+          </Text>
         </Button>
       </View>
 
@@ -136,7 +162,7 @@ export function StepPhysicalStats({
         isVisible={heightSheetOpen}
         onClose={() => setHeightSheetOpen(false)}
         title='Select Height (cm)'
-        snapPoints={[0.6]}
+        snapPoints={[0.9]}
       >
         <View className='px-4 gap-2'>
           {heights.map((height) => (

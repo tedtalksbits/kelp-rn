@@ -105,7 +105,9 @@ export function StepNotifications({
           </Text>
         </Button>
         <Button size='lg' variant='secondary' onPress={goToPrevious}>
-          <Text className='text-foreground font-bold text-lg'>Back</Text>
+          <Text className='text-secondary-foreground font-bold text-lg'>
+            Back
+          </Text>
         </Button>
       </View>
     </View>

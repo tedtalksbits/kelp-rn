@@ -144,7 +144,7 @@ export function OnboardingWizard() {
   }
 
   return (
-    <ScreenView className='bg-background'>
+    <ScreenView>
       {/* Progress Bar */}
       <View className='w-full h-1 bg-secondary'>
         <View className='h-full bg-primary' style={{ width: `${progress}%` }} />

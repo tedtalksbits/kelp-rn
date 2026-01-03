@@ -3,6 +3,7 @@ import { View, TextInput } from 'react-native';
 import { Text } from '@/components/text';
 import { Button } from '@/components/button';
 import type { OnboardingStepProps } from '../../types/onboarding.types';
+import { Input } from '@/components/input';
 
 export function StepName({
   data,
@@ -22,12 +23,10 @@ export function StepName({
           Let's start with the basics. What should we call you?
         </Text>
 
-        <TextInput
+        <Input
           value={data.name}
           onChangeText={(text) => updateData({ name: text })}
           placeholder='Enter your name'
-          placeholderTextColor='#71717a'
-          className='bg-surface rounded-lg px-4 py-4 text-foreground text-lg border-2 border-border focus:border-primary'
           autoFocus
           returnKeyType='next'
           onSubmitEditing={() => isValid && goToNext()}

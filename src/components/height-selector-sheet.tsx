@@ -3,7 +3,7 @@ import { cn } from '@/libs/utils';
 import { Button } from './button';
 import { BottomSheet, useBottomSheet } from './bottom-sheet';
 import { Surface } from './surface';
-import { View, Pressable, ScrollView, Modal } from 'react-native';
+import { View, Pressable, ScrollView, Modal, Dimensions } from 'react-native';
 import { Text } from './text';
 import { GlassView } from 'expo-glass-effect';
 import { withUniwind } from 'uniwind';
@@ -42,6 +42,8 @@ function feetInchesToCm(feet: number, inches: number) {
 
 const StyledGlassView = withUniwind(GlassView);
 const StyledXIcon = withUniwind(X);
+
+const SCREEN_HEIGHT = Dimensions.get('window').height;
 
 export function HeightSelectorSheet({
   trigger,
@@ -93,7 +95,7 @@ export function HeightSelectorSheet({
           scrollViewRef.current as any,
           (x, y) => {
             scrollViewRef.current?.scrollTo({
-              y: y - 150,
+              y: y - SCREEN_HEIGHT / 2 + 100, // center the item
               animated: true,
             });
           },
@@ -179,101 +181,131 @@ export function HeightSelectorSheet({
             </StyledGlassView>
           </View>
 
-          <ScrollView
-            ref={scrollViewRef}
-            className='flex-1 -mx-4 bg-popover relative'
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingBottom: 100 }}
-          >
-            <View className='p-2'>
-              {unit === 'cm' ? (
-                <>
-                  {Array.from(
-                    { length: CM_MAX - CM_MIN + 1 },
-                    (_, i) => CM_MIN + i
-                  ).map((cm) => {
-                    const isSelected = normalizedValue === cm;
-                    return (
-                      <Pressable
-                        key={cm}
-                        ref={(ref) => {
-                          selectedHeightRefs.current[cm] = ref;
-                        }}
-                        className={cn(
-                          'w-full text-center transition-all ease-in-out duration-200 py-2 flex-row items-center',
-                          {
-                            'relative border-primary py-4': isSelected,
-                          }
-                        )}
-                        onPress={() => onChange(cm, close)}
-                      >
-                        <Text
-                          className={cn('text-2xl text-center flex-1', {
-                            'text-primary text-4xl font-bold': isSelected,
-                          })}
-                        >
-                          {cm}
-                          {isSelected && (
-                            <Text className='ml-1 text-sm'> cm</Text>
-                          )}
-                        </Text>
-                        <View
+          <View className='flex-1 relative'>
+            <ScrollView
+              ref={scrollViewRef}
+              className='flex-1 -mx-4 bg-popover'
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={{ paddingBottom: 100 }}
+            >
+              <View className='p-2'>
+                {unit === 'cm' ? (
+                  <>
+                    {Array.from(
+                      { length: CM_MAX - CM_MIN + 1 },
+                      (_, i) => CM_MIN + i
+                    ).map((cm) => {
+                      const isSelected = normalizedValue === cm;
+                      return (
+                        <Pressable
+                          key={cm}
+                          ref={(ref) => {
+                            selectedHeightRefs.current[cm] = ref;
+                          }}
                           className={cn(
-                            'h-px w-6 bg-foreground/80 absolute right-0',
+                            'w-full text-center transition-all ease-in-out duration-200 py-2 flex-row items-center',
                             {
-                              // longer line for numbers divisble by 10
-                              'w-12': cm % 10 === 0,
+                              'relative border-primary py-4': isSelected,
                             }
                           )}
-                        ></View>
-                      </Pressable>
-                    );
-                  })}
-                </>
-              ) : (
-                <>
-                  {feetInchesOptions.map(({ cm, label }) => {
-                    const isSelected = normalizedValue === cm;
-                    return (
-                      <Pressable
-                        key={label}
-                        ref={(ref) => {
-                          selectedHeightRefs.current[cm] = ref;
-                        }}
-                        className={cn(
-                          'w-full text-center transition-all ease-in-out duration-200 py-2 flex-row items-center',
-                          {
-                            'relative border-primary py-4': isSelected,
-                          }
-                        )}
-                        onPress={() => onChange(cm, close)}
-                      >
-                        <Text
-                          className={cn('text-2xl text-center flex-1', {
-                            'text-primary text-4xl font-bold': isSelected,
-                          })}
+                          onPress={() => onChange(cm, close)}
                         >
-                          {label}
-                          {isSelected && (
-                            <Text className='ml-1 text-sm'> ({cm} cm)</Text>
-                          )}
-                        </Text>
-                        <View
+                          <Text
+                            className={cn('text-2xl text-center flex-1', {
+                              'text-primary text-4xl font-bold': isSelected,
+                            })}
+                          >
+                            {cm}
+                            {isSelected && (
+                              <Text className='ml-1 text-sm'> cm</Text>
+                            )}
+                          </Text>
+                          <View
+                            className={cn(
+                              'h-px w-6 bg-foreground/80 absolute right-0',
+                              {
+                                // longer line for numbers divisble by 10
+                                'w-12': cm % 10 === 0,
+                              }
+                            )}
+                          ></View>
+                        </Pressable>
+                      );
+                    })}
+                  </>
+                ) : (
+                  <>
+                    {feetInchesOptions.map(({ cm, label }) => {
+                      const isSelected = normalizedValue === cm;
+                      return (
+                        <Pressable
+                          key={label}
+                          ref={(ref) => {
+                            selectedHeightRefs.current[cm] = ref;
+                          }}
                           className={cn(
-                            'h-px w-6 bg-foreground/80 absolute right-0',
+                            'w-full text-center transition-all ease-in-out duration-200 py-2 flex-row items-center',
                             {
-                              // longer line for every foot
-                              'w-12': label.endsWith(`' 0"`),
+                              'relative border-primary py-4': isSelected,
                             }
                           )}
-                        />
-                      </Pressable>
-                    );
-                  })}
-                </>
-              )}
-            </View>
-          </ScrollView>
+                          onPress={() => onChange(cm, close)}
+                        >
+                          <Text
+                            className={cn('text-2xl text-center flex-1', {
+                              'text-primary text-4xl font-bold': isSelected,
+                            })}
+                          >
+                            {label}
+                            {isSelected && (
+                              <Text className='ml-1 text-sm'> ({cm} cm)</Text>
+                            )}
+                          </Text>
+                          <View
+                            className={cn(
+                              'h-px w-6 bg-foreground/80 absolute right-0',
+                              {
+                                // longer line for every foot
+                                'w-12': label.endsWith(`' 0"`),
+                              }
+                            )}
+                          />
+                        </Pressable>
+                      );
+                    })}
+                  </>
+                )}
+              </View>
+            </ScrollView>
+
+            {/* Top gradient overlay - darker at top, fading to transparent */}
+            <LinearGradient
+              colors={['rgba(0, 0, 0, 0.8)', 'transparent']}
+              pointerEvents='none'
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                height: 200,
+                zIndex: 10,
+              }}
+            />
+
+            {/* Bottom gradient overlay - transparent fading to darker at bottom */}
+            <LinearGradient
+              colors={['transparent', 'rgba(0, 0, 0, 0.8)']}
+              pointerEvents='none'
+              style={{
+                position: 'absolute',
+                bottom: 0,
+                left: 0,
+                right: 0,
+                height: 200,
+                zIndex: 10,
+              }}
+            />
+          </View>
 
           {handleConfirm && (
             <Button

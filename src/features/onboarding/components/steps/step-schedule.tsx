@@ -73,24 +73,26 @@ export function StepSchedule({
             {DAYS.map((day) => {
               const isSelected = data.workoutDays.includes(day.value);
               return (
-                <Pressable key={day.value} onPress={() => toggleDay(day.value)}>
-                  <Surface
+                <Pressable
+                  key={day.value}
+                  onPress={() => toggleDay(day.value)}
+                  className={cn(
+                    'w-12 h-12 items-center justify-center border-2 rounded-lg',
+                    isSelected
+                      ? 'border-primary bg-primary'
+                      : 'border-border bg-surface'
+                  )}
+                >
+                  <Text
                     className={cn(
-                      'w-12 h-12 items-center justify-center border-2',
+                      'font-bold text-sm',
                       isSelected
-                        ? 'border-primary bg-primary'
-                        : 'border-border bg-surface'
+                        ? 'text-primary-foreground'
+                        : 'text-muted-foreground'
                     )}
                   >
-                    <Text
-                      className={cn(
-                        'font-bold text-sm',
-                        isSelected ? 'text-black' : 'text-muted-foreground'
-                      )}
-                    >
-                      {day.label}
-                    </Text>
-                  </Surface>
+                    {day.label}
+                  </Text>
                 </Pressable>
               );
             })}
@@ -103,7 +105,7 @@ export function StepSchedule({
             Preferred Time (Optional)
           </Text>
           <Pressable onPress={() => setTimeSheetOpen(true)}>
-            <Surface className='p-4 border-2 border-border'>
+            <Surface className='p-4'>
               <Text className='text-xs text-muted-foreground mb-1 uppercase'>
                 Time
               </Text>
@@ -122,7 +124,9 @@ export function StepSchedule({
           </Text>
         </Button>
         <Button size='lg' variant='secondary' onPress={goToPrevious}>
-          <Text className='text-foreground font-bold text-lg'>Back</Text>
+          <Text className='text-secondary-foreground font-bold text-lg'>
+            Back
+          </Text>
         </Button>
       </View>
 
